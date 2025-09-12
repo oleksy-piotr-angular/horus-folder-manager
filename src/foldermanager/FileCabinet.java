@@ -29,7 +29,7 @@ public class FileCabinet implements Cabinet {
 
     @Override
     public int count() {
-        throw new UnsupportedOperationException();
+        return (int) streamAll().count();
     }
 
     private Stream<Folder> streamAll() {
