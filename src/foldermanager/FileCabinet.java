@@ -3,6 +3,7 @@ package foldermanager;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileCabinet implements Cabinet {
@@ -21,7 +22,9 @@ public class FileCabinet implements Cabinet {
 
     @Override
     public List<Folder> findFoldersBySize(String size) {
-        throw new UnsupportedOperationException();
+        return streamAll()
+                .filter(f -> f.getSize().equals(size))
+                .collect(Collectors.toList());
     }
 
     @Override
