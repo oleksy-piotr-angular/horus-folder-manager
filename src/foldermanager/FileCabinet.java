@@ -14,7 +14,9 @@ public class FileCabinet implements Cabinet {
 
     @Override
     public Optional<Folder> findFolderByName(String name) {
-        throw new UnsupportedOperationException();
+        return streamAll()
+                .filter(f -> f.getName().equals(name))
+                .findAny();
     }
 
     @Override
