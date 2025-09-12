@@ -1,7 +1,9 @@
 package foldermanager;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class FileCabinet implements Cabinet {
     private final List<Folder> folders;
@@ -23,5 +25,17 @@ public class FileCabinet implements Cabinet {
     @Override
     public int count() {
         throw new UnsupportedOperationException();
+    }
+
+    private Stream<Folder> streamAll() {
+        return folders.stream().flatMap(this::flatten);
+    }
+
+    private Stream<Folder> flatten(Folder folder) {
+        Stream<Folder> self = Stream.of(folder);
+        if (folder instanceof MultiFolder mf) {
+            return Stream.concat(self, mf.getFolders().stream().flatMap(this::flatten));
+        }
+        return self;
     }
 }
