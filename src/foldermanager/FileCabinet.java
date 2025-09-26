@@ -1,8 +1,6 @@
 package foldermanager;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,32 +13,50 @@ public class FileCabinet implements Cabinet {
 
     @Override
     public Optional<Folder> findFolderByName(String name) {
-        return streamAll()
+        return streamAllIterative()
                 .filter(f -> f.getName().equals(name))
                 .findAny();
     }
 
     @Override
     public List<Folder> findFoldersBySize(String size) {
-        return streamAll()
+        return streamAllIterative()
                 .filter(f -> f.getSize().equals(size))
                 .collect(Collectors.toList());
     }
 
     @Override
     public int count() {
-        return (int) streamAll().count();
+        return (int) streamAllIterative().count();
     }
 
-    private Stream<Folder> streamAll() {
-        return folders.stream().flatMap(this::flatten);
-    }
+    /**
+     * Iterative flattening: for each folder, we
+     * push it onto the stack and loop through it until
+     * the stack is empty and
+     * all nested folders have been taken from all nodes(MultiFolders) of the tree
+     */
+    private Stream<Folder> streamAllIterative() {
+        List<Folder> all = new ArrayList<>();
 
-    private Stream<Folder> flatten(Folder folder) {
-        Stream<Folder> self = Stream.of(folder);
-        if (folder instanceof MultiFolder mf) {
-            return Stream.concat(self, mf.getFolders().stream().flatMap(this::flatten));
-        }
-        return self;
+        // for each folder, run the flattening process
+        folders.forEach(folder -> {
+            Deque<Folder> stack = new ArrayDeque<>();
+            stack.push(folder);
+
+            while (!stack.isEmpty()) {
+                Folder currentFolder = stack.pop();
+                all.add(currentFolder);
+
+                if (currentFolder instanceof MultiFolder) {
+                    // put all children on the stack
+                    ((MultiFolder) currentFolder)
+                            .getFolders()
+                            .forEach(stack::push);
+                }
+            }
+        });
+
+        return all.stream();
     }
 }
